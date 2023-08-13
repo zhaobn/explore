@@ -5,20 +5,17 @@ let subjectData = {};
 
 
 /* Assign task items */
-const N_TASK = 20;
-const ALL_ITEMS = [
-  'soil', 'rabbit-caught', 'berry-harvest', 'stone', 'rabbit', 'bow', 'rabbit-housed',
-  'water', 'branch', 'seedling', 'mushroom', 'steel', 'arrow', 'berry', 'sheep',
-];
+const N_TASK = 30;
+const ALL_ITEMS = [ 'tria', 'star', 'circ'];
 const ALL_CELL_IDS = getAllCellIds();
 
 let [ clickData, clickDataKeys ] =[ {}, [] ];
 let [ task_items, task_cells, task_cell_item] = [ {}, {}, {} ];
 
 for (let i = 0; i < N_TASK; i++) {
-  let task_size = randFromRange(2, 9);
-  task_items[`task_${i+1}`] = sampleFromList(ALL_ITEMS, n=task_size); // sample items
-  task_cells[`task_${i+1}`] = sampleFromList(ALL_CELL_IDS, n=task_size, replace=false); // sample cell-ids
+  let task_size = 10; //randFromRange(2, 9);
+  task_items[`task_${i+1}`] = [ 'tria', 'tria', 'star', 'star', 'star', 'star', 'circ','circ','circ','circ' ] //sampleFromList(ALL_ITEMS, n=task_size); // sample items
+  task_cells[`task_${i+1}`] = sampleFromList(ALL_CELL_IDS, n=task_size, replace=0); // sample cell-ids
 
   let fullCellIds = task_cells[`task_${i+1}`].map(el => `task${i+1}-grid-${el}`); // get full-name cell-ids
   fullCellIds.forEach((el, idx) => task_cell_item[el] = task_items[`task_${i+1}`][idx]); // append items
@@ -26,8 +23,6 @@ for (let i = 0; i < N_TASK; i++) {
   clickDataKeys = clickDataKeys.concat(fullCellIds);
 }
 clickDataKeys.forEach(el => clickData[el] = 0);
-
-
 
 
 
@@ -49,6 +44,11 @@ for (let tid = 1; tid <= N_TASK; tid++) {
 
   // Main task box
   let mainBoxDiv = createCustomElement('div', 'main-box', `main-box-${tid}`);
+  let scoreBox = createCustomElement('div', 'score-box', `score-box-${tid}`);
+
+  scoreBox.innerHTML = showScoreText(1000);
+  mainBoxDiv.append(scoreBox);
+
   let itemsBox= createCustomElement('div', 'items-box', `items-box-${tid}`);
   let itemsTab = createCustomElement('table', 'worktop-table', id=`items-tab-${tid}`);
 
@@ -62,10 +62,20 @@ for (let tid = 1; tid <= N_TASK; tid++) {
       tcell.id = tcellId;
 
       //tcell.style.border = 'red solid 1px';
-      tcell.style.width = '40px';
+      tcell.style.height = '60px';
+      tcell.style.width = '60px';
+      tcell.style.textAlign = 'center';
+      tcell.style.verticalAlign = 'middle';
 
       if (Object.keys(task_cell_item).indexOf(tcellId) > -1 ) {
-        tcell.innerHTML = drawItem(task_cell_item[tcellId]);
+        //tcell.innerHTML = drawItem(task_cell_item[tcellId]);
+        if (task_cell_item[tcellId] == 'circ') {
+          tcell.append( drawCircle('red'));
+        } else if (task_cell_item[tcellId] == 'tria') {
+          tcell.append(drawTriangle());
+        } else if (task_cell_item[tcellId] == 'star') {
+          tcell.append(drawStar('yellow'));
+        }
         tcell.onclick = () => cellClick(tcellId);
       }
 

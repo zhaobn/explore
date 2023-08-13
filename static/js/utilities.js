@@ -1,6 +1,6 @@
 
-const NCOL = 6
-const NROW = 10
+const NCOL = 10
+const NROW = 6
 
 /* Custom wrappers */
 function createCustomElement (type = 'div', className, id) {
@@ -120,7 +120,7 @@ function sampleFromList(arr, n=1, replace=true) {
       let randomIndex = Math.floor(Math.random()*arr.length);
       sampled.push(arr[randomIndex]);
       if (replace == 0) {
-        arr.slice(randomIndex, 1)[0];
+        arr.splice(randomIndex, 1)[0];
       }
     }
     return sampled;
@@ -139,6 +139,76 @@ function swapObjectKeyValue(obj){
 
 
 /* Task-specific functions */
+function showScoreText(x) {
+  return `<h1>XP: <font color="red">${x}</font></h1>`
+}
+function drawCircle(fillColor, radius=24, borderColor='black', borderSize=2) {
+  let retCanvas = createCustomElement('canvas', 'drawings', '');
+  retCanvas.height = 60;
+  retCanvas.width = 60;
+  let context = retCanvas.getContext('2d');
+
+  context.beginPath();
+  context.arc(retCanvas.width/2, retCanvas.height/2, radius, 0, 2 * Math.PI, false);
+
+  context.fillStyle = fillColor;
+  context.fill();
+
+  context.lineWidth = borderSize;
+  context.strokeStyle = borderColor;
+  context.stroke();
+
+  return retCanvas
+}
+function drawTriangle(edgeLength=30, fillColor='black', borderColor='black', borderSize=1) {
+  let retCanvas = createCustomElement('canvas', 'drawings', '');
+  retCanvas.height = 60;
+  retCanvas.width = 60;
+  let context = retCanvas.getContext('2d');
+
+  let height = edgeLength * Math.cos(Math.PI / 6);
+  context.beginPath();
+  context.moveTo((retCanvas.width-edgeLength)/2, (retCanvas.height+height)/2);
+  context.lineTo((retCanvas.width+edgeLength)/2, (retCanvas.height+height)/2);
+  context.lineTo(retCanvas.width/2, (retCanvas.height-height)/2);
+  context.closePath();
+
+  context.lineWidth = borderSize;
+  context.strokeStyle = borderColor;
+  context.stroke();
+
+  context.fillStyle = fillColor;
+  context.fill();
+
+  return retCanvas;
+}
+function drawStar(fillColor, spikes=5, outerRadius=30,innerRadius=15,borderColor='black', borderSize=2) {
+  let retCanvas = createCustomElement('canvas', 'drawings', '');
+  retCanvas.height = 60;
+  retCanvas.width = 60;
+
+  let context = retCanvas.getContext('2d');
+  context.save();
+  context.beginPath();
+  context.translate(retCanvas.width/2, retCanvas.height/2);
+  context.moveTo(0, 0-outerRadius);
+  for (var i = 0; i < spikes; i++) {
+    context.rotate(Math.PI / spikes);
+    context.lineTo(0, 0 - innerRadius);
+    context.rotate(Math.PI / spikes);
+    context.lineTo(0, 0 - outerRadius);
+  }
+  context.closePath();
+  context.lineWidth=borderSize;
+  context.strokeStyle=borderColor;
+  context.stroke();
+
+  context.fillStyle=fillColor;
+  context.fill();
+  context.restore();
+  return retCanvas;
+}
+
 function drawItem (item) {
   return (item.length > 0)? `<img src="static/imgs/${item}.png" style="height:60px">`: '';
 }
