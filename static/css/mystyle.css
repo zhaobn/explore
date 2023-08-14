@@ -81,6 +81,35 @@ h1 {
 .drawings {
   /* background-color: #f6f6f6; */
 }
+.score-wrapper {
+  display: flex;
+  justify-content: flex-end;
+}
+.feedback-box, .score-box {
+  width: 33%;
+  /* border: #f6f6f6 solid 2pt; */
+  text-align: center;
+  vertical-align: bottom;
+}
+/* @keyframes fadeInOutAnimation {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+} */
+@keyframes fadeIn {
+  0% {opacity: 0;}
+  100% {opacity: 1;}
+}
+.feedback-box {
+  animation: fadeIn ease-in-out 3s;
+  /* cursor: pointer;
+  animation: fadeInOutAnimation 1.5s infinite;
+  animation-direction: alternate-reverse;
+  animation-timing-function: ease-in-out; */
+}
 #consent-info {
   height: 400px;
   overflow: scroll;

@@ -7,23 +7,31 @@ let subjectData = {};
 /* Assign task items */
 const N_TASK = 30;
 const ALL_ITEMS = [ 'tria', 'star', 'circ'];
-const ALL_CELL_IDS = getAllCellIds();
+const CONFIGS = {
+  'tria': { 'prob': 0, 'cost': 0, 'reward': 0 },
+  'star': { 'prob': 0.6, 'cost': 10, 'reward': 50 },
+  'circ': { 'prob': 0.2, 'cost': 10, 'reward': 200 },
+}
+// const ADV_COLORS = ['limegreen', 'purple', 'pink', 'orange', 'lightskyblue' ];
 
 let [ clickData, clickDataKeys ] =[ {}, [] ];
-let [ task_items, task_cells, task_cell_item] = [ {}, {}, {} ];
+let [ task_items, task_cells, task_cell_item, task_scores ] = [ {}, {}, {}, [] ];
 
 for (let i = 0; i < N_TASK; i++) {
   let task_size = 10; //randFromRange(2, 9);
   task_items[`task_${i+1}`] = [ 'tria', 'tria', 'star', 'star', 'star', 'star', 'circ','circ','circ','circ' ] //sampleFromList(ALL_ITEMS, n=task_size); // sample items
-  task_cells[`task_${i+1}`] = sampleFromList(ALL_CELL_IDS, n=task_size, replace=0); // sample cell-ids
+
+  let all_cell_ids = getAllCellIds();
+  task_cells[`task_${i+1}`] = sampleFromList(all_cell_ids, n=task_size, replace=0); // sample cell-ids
 
   let fullCellIds = task_cells[`task_${i+1}`].map(el => `task${i+1}-grid-${el}`); // get full-name cell-ids
   fullCellIds.forEach((el, idx) => task_cell_item[el] = task_items[`task_${i+1}`][idx]); // append items
 
   clickDataKeys = clickDataKeys.concat(fullCellIds);
+
+  task_scores.push(0)
 }
 clickDataKeys.forEach(el => clickData[el] = 0);
-
 
 
 /* Collect prolific id */
@@ -44,10 +52,19 @@ for (let tid = 1; tid <= N_TASK; tid++) {
 
   // Main task box
   let mainBoxDiv = createCustomElement('div', 'main-box', `main-box-${tid}`);
-  let scoreBox = createCustomElement('div', 'score-box', `score-box-${tid}`);
 
-  scoreBox.innerHTML = showScoreText(1000);
-  mainBoxDiv.append(scoreBox);
+  let scoreWrapper = createCustomElement('div', 'score-wrapper', `score-wrapper-${tid}`);
+
+  let feedbackBox =  createCustomElement('div', 'feedback-box', `feedback-box-${tid}`);
+  feedbackBox.innerHTML = showFeedback(0)
+  scoreWrapper.append(feedbackBox);
+
+  let scoreBox = createCustomElement('div', 'score-box', `score-box-${tid}`);
+  scoreBox.innerHTML = showScoreText(task_scores[tid-1]);
+  scoreWrapper.append(scoreBox);
+
+  mainBoxDiv.append(scoreWrapper)
+
 
   let itemsBox= createCustomElement('div', 'items-box', `items-box-${tid}`);
   let itemsTab = createCustomElement('table', 'worktop-table', id=`items-tab-${tid}`);
@@ -70,7 +87,7 @@ for (let tid = 1; tid <= N_TASK; tid++) {
       if (Object.keys(task_cell_item).indexOf(tcellId) > -1 ) {
         //tcell.innerHTML = drawItem(task_cell_item[tcellId]);
         if (task_cell_item[tcellId] == 'circ') {
-          tcell.append( drawCircle('red'));
+          tcell.append( drawCircle('brown'));
         } else if (task_cell_item[tcellId] == 'tria') {
           tcell.append(drawTriangle());
         } else if (task_cell_item[tcellId] == 'star') {
@@ -86,9 +103,24 @@ for (let tid = 1; tid <= N_TASK; tid++) {
 
   // Task button
   let buttonDiv = createCustomElement('div', 'button-group-vc', '');
-  let taskBtn = createBtn(`task-confirm-${tid}`, 'Confirm', true, 'big-button');
-  taskBtn.onclick = () => task_next(tid);
-  buttonDiv.append(taskBtn)
+  let taskBtn = createBtn(`task-confirm-${tid}`, 'Combine!', true, 'big-button');
+  let taskNextBtn = createBtn(`task-next-${tid}`, 'Next', false, 'big-button');
+  let taskFillerBtn = createBtn(`task-noshow-${tid}`, '', true, 'big-button');
+  taskFillerBtn.style.opacity = 0;
+  buttonDiv.append(taskFillerBtn);
+  buttonDiv.append(taskBtn);
+  buttonDiv.append(taskNextBtn);
+  taskBtn.onclick = () => {
+    let selectedItems = readTaskData(clickData, 'task'+tid, task_cell_item );
+    let feedback = getTaskFeedbackChunk(selectedItems[0], CONFIGS);
+
+    feedbackBox.innerHTML = showFeedback(feedback)
+    task_scores[tid-1] += feedback;
+    scoreBox.innerHTML = showScoreText(task_scores[tid-1]);
+
+    taskNextBtn.disabled = false;
+  }
+  taskNextBtn.onclick = () => task_next(tid);
 
   // Assemble
   taskDiv.append(progressDiv);

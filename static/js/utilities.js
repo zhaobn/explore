@@ -140,7 +140,16 @@ function swapObjectKeyValue(obj){
 
 /* Task-specific functions */
 function showScoreText(x) {
-  return `<h1>XP: <font color="red">${x}</font></h1>`
+  return `<h3>Total XP: ${x}</h3>`
+}
+function showFeedback(x) {
+  if (x>0) {
+    return `<h1><font color="green">+${x}</font></h1>`
+  } else if (x<0) {
+    return `<h1><font color="red">${x}</font></h1>`
+  } else {
+    return ''
+  }
 }
 function drawCircle(fillColor, radius=24, borderColor='black', borderSize=2) {
   let retCanvas = createCustomElement('canvas', 'drawings', '');
@@ -182,7 +191,7 @@ function drawTriangle(edgeLength=30, fillColor='black', borderColor='black', bor
 
   return retCanvas;
 }
-function drawStar(fillColor, spikes=5, outerRadius=30,innerRadius=15,borderColor='black', borderSize=2) {
+function drawStar(fillColor, spikes=5, outerRadius=30,innerRadius=15,borderColor='black', borderSize=3) {
   let retCanvas = createCustomElement('canvas', 'drawings', '');
   retCanvas.height = 60;
   retCanvas.width = 60;
@@ -221,63 +230,26 @@ function getAllCellIds(ncol=NCOL, nrow=NROW) {
   }
   return ret
 }
-function combineClick() {
-  // Get selected items
-  let selected_items = [];
-  let selected_cells = [];
-  Object.keys(demoState).forEach(key => {
-    if (demoState[key].length > 0 && demoStateCount[key] % 2 == 1) {
-      selected_items.push(demoState[key]);
-      selected_cells.push(key);
-    }
-  });
-  console.log(selected_items)
-
-
-  let combo = selected_items.sort().join('');
-  //console.log(combo)
-
-  // Check if a change should happen
-  if (Object.keys(TECH_TREE).indexOf(combo) > -1 && Math.random() < TECH_TREE[combo][1] ) {
-
-    let items_to_combine = {};
-    selected_cells.forEach(key => items_to_combine[key] = demoState[key]);
-    items_to_combine = swapObjectKeyValue(items_to_combine);
-
-    switch (combo) {
-
-      case 'berrysoilwater':
-        // Make soil => seedling and other two disappear
-        getEl(items_to_combine['soil']).innerHTML = drawItem('seedling');
-        getEl(items_to_combine['soil']).style.border = 'gold solid 10px';
-        getEl(items_to_combine['water']).innerHTML = '';
-        getEl(items_to_combine['water']).style.border = '0px';
-        getEl(items_to_combine['berry']).innerHTML = '';
-        getEl(items_to_combine['berry']).style.border = '0px';
-        selected_items = []; // <-- Not working now
-
-        break;
-
-      case 'branchstone':
-        // Make branch => arrow and stone disappears
-        getEl(items_to_combine['branch']).innerHTML = drawItem('arrow');
-        getEl(items_to_combine['branch']).style.border = 'gold solid 10px';
-        getEl(items_to_combine['stone']).innerHTML = '';
-        getEl(items_to_combine['stone']).style.border = '0px';
-        selected_items = [];
-
-        break;
-
-    }
-
-
+function readTaskData (obj, taskId, refObj, retType = 'obj') {
+  let taskData = Object.fromEntries(Object.entries(obj).
+    filter(([key, value]) => (key.split('-')[0] == taskId) & (value%2==1)));
+  let selected = Object.fromEntries(Object.entries(refObj).
+    filter(([key]) => Object.keys(taskData).includes(key)));
+  if (retType == 'obj') {
+    return Object.values(selected)
+  } else if (retType == 'id') {
+    return Object.keys(selected)
   } else {
-    console.log('Nothing happens')
+    return taskData
   }
-
-
-  // Check if is a reward
-  if (Object.keys(REWARDS).indexOf(combo) > -1) {
-    console.log('Get ' + REWARDS[combo] + 'XP!')
+}
+function getTaskFeedbackChunk (item, config) {
+  if (Math.random() < config[item]['prob']) {
+    return Math.abs(config[item]['reward'])
+  } else {
+    return -1*Math.abs(config[item]['cost'])
   }
+}
+function showFeedbackDiv (taskId, feedback) {
+
 }
