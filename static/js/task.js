@@ -87,13 +87,13 @@ for (let tid = 1; tid <= N_TASK; tid++) {
       if (Object.keys(task_cell_item).indexOf(tcellId) > -1 ) {
         //tcell.innerHTML = drawItem(task_cell_item[tcellId]);
         if (task_cell_item[tcellId] == 'circ') {
-          tcell.append( drawCircle('brown'));
+          tcell.append(drawCircle('brown'));
         } else if (task_cell_item[tcellId] == 'tria') {
           tcell.append(drawTriangle());
         } else if (task_cell_item[tcellId] == 'star') {
           tcell.append(drawStar('yellow'));
         }
-        tcell.onclick = () => cellClick(tcellId);
+        tcell.onclick = () => cellClick(tcellId, tid);
       }
 
     }
@@ -103,7 +103,7 @@ for (let tid = 1; tid <= N_TASK; tid++) {
 
   // Task button
   let buttonDiv = createCustomElement('div', 'button-group-vc', '');
-  let taskBtn = createBtn(`task-confirm-${tid}`, 'Combine!', true, 'big-button');
+  let taskBtn = createBtn(`task-confirm-${tid}`, 'Combine!', false, 'big-button');
   let taskNextBtn = createBtn(`task-next-${tid}`, 'Next', false, 'big-button');
   let taskFillerBtn = createBtn(`task-noshow-${tid}`, '', true, 'big-button');
   taskFillerBtn.style.opacity = 0;
@@ -117,8 +117,13 @@ for (let tid = 1; tid <= N_TASK; tid++) {
     feedbackBox.innerHTML = showFeedback(feedback)
     task_scores[tid-1] += feedback;
     scoreBox.innerHTML = showScoreText(task_scores[tid-1]);
+    if (feedback > 0) {
+      showNewItem(readTaskData(clickData, 'task'+tid, task_cell_item, 'id'), selectedItems[0])
+    }
 
+    taskBtn.disabled = true;
     taskNextBtn.disabled = false;
+    disableCellSelection(tid);
   }
   taskNextBtn.onclick = () => task_next(tid);
 
@@ -138,14 +143,36 @@ function task_next(id) {
     hideAndShowNext("task", "debrief", "block");
   }
 }
-function cellClick (cell_id) {
+function cellClick (cell_id, taskId) {
   clickData[cell_id] += 1;
+  checkSelection(taskId);
+
   if (clickData[cell_id] % 2 == 1) {
     getEl(cell_id).style.border = 'solid red 2px';
   } else {
     getEl(cell_id).style.border = '0px';
   }
 }
+function checkSelection (taskId) {
+  let selected = readTaskData(clickData, 'task'+taskId, task_cell_item)
+  if (selected.length == 2) {
+    if (selected[0] == selected[1]) {
+      getEl(`task-confirm-${taskId}`).disabled = false
+    }
+  }
+}
+function disableCellSelection(tid) {
+  for (let i = 0; i < NROW; i++) {
+    for (let j = 0; j < NCOL; j++) {
+      getEl(`task${tid}-grid-` + (j+1).toString() + '-' + (NROW-i).toString()).onclick = () => {};
+    }
+  }
+}
+
+
+
+
+
 
 
 /* Comprehension quiz */

@@ -250,6 +250,17 @@ function getTaskFeedbackChunk (item, config) {
     return -1*Math.abs(config[item]['cost'])
   }
 }
-function showFeedbackDiv (taskId, feedback) {
+function showNewItem (ids, item) {
+  getEl(ids[0]).removeChild(getEl(ids[0]).firstChild);
+  getEl(ids[1]).removeChild(getEl(ids[1]).firstChild);
+  getEl(ids[1]).style.borderColor = 'white';
+
+  if (item == 'star') {
+    getEl(ids[0]).append(drawStar('limegreen'));
+    getEl(ids[0]).style.borderColor = 'limegreen';
+  } else if (item == 'circ') {
+    getEl(ids[0]).append(drawCircle('lightblue'));
+    getEl(ids[0]).style.borderColor = 'lightblue';
+  }
 
 }
