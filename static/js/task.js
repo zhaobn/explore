@@ -18,7 +18,8 @@ const TASK_COUNT = [ 5, 5 ];
 const N_TASK = TASK_COUNT.reduce((partialSum, a) => partialSum + a, 0);
 
 let [ clickData, clickDataKeys ] =[ {}, [] ];
-let [ task_items, task_cells, task_cell_item, task_scores ] = [ {}, {}, {}, [] ];
+let [ task_items, task_cells, task_cell_item ] = [ {}, {}, {} ];
+let task_scores = [ 0, 0 ];
 
 for (let i = 0; i < N_TASK; i++) {
   let task_size = 0; //randFromRange(2, 9);
@@ -42,7 +43,6 @@ for (let i = 0; i < N_TASK; i++) {
   task_scores.push(0)
 }
 clickDataKeys.forEach(el => clickData[el] = 0);
-console.log(task_cell_item)
 
 
 /* Collect prolific id */
@@ -71,7 +71,7 @@ for (let tid = 1; tid <= N_TASK; tid++) {
   scoreWrapper.append(feedbackBox);
 
   let scoreBox = createCustomElement('div', 'score-box', `score-box-${tid}`);
-  scoreBox.innerHTML = showScoreText(task_scores[tid-1]);
+  scoreBox.innerHTML = (tid < TASK_COUNT[0]) ? showScoreText(task_scores[0]) : showScoreText(task_scores[1]);
   scoreWrapper.append(scoreBox);
 
   mainBoxDiv.append(scoreWrapper)
@@ -125,9 +125,12 @@ for (let tid = 1; tid <= N_TASK; tid++) {
     let selectedItems = readTaskData(clickData, 'task'+tid, task_cell_item );
     let feedback = getTaskFeedbackChunk(selectedItems[0], CONFIGS);
 
-    feedbackBox.innerHTML = showFeedback(feedback)
-    task_scores[tid-1] += feedback;
-    scoreBox.innerHTML = showScoreText(task_scores[tid-1]);
+    feedbackBox.innerHTML = showFeedback(feedback);
+    (tid <= TASK_COUNT[0]) ? task_scores[0] += feedback : task_scores[1] += feedback;
+    scoreBox.innerHTML = (tid <= TASK_COUNT[0]) ? showScoreText(task_scores[0]) : showScoreText(task_scores[1]);
+    (tid < N_TASK) ? getEl(`score-box-${tid+1}`).innerHTML = scoreBox.innerHTML: null;
+    (tid == TASK_COUNT[0]) ? getEl(`score-box-${tid+1}`).innerHTML = showScoreText(task_scores[1]): null;
+
     if (feedback > 0) {
       showNewItem(readTaskData(clickData, 'task'+tid, task_cell_item, 'id'), selectedItems[0])
     }
