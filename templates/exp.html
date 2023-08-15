@@ -116,7 +116,28 @@
     </div>
 
 
-    <div id="task" class="base" ></div>
+    <div id="task-phase1" class="base" ></div>
+
+
+    <div id="instruction-mid" class="base" style="display:none;" >
+      <h1>Instruction</h1>
+
+      <div id="instruction-mid">
+        <div style="padding-left:5px;height:400px;">
+          <p>You will be presented with several items. Some items, when combined together, can produce a new item.</p>
+          <p>For example, combining a “flint” and a “wood” can make a “fire”.</p>
+          <p><strong>We are interested in your intuition about which items you would like to combine</strong>, if you are playing such a game.</p>
+          <p>The whole task consists of 20 rounds. In each round, you can select the items you'd like to combine by clicking on them. To unselect an item, just click on that item again.</p>
+          <p>When you are happy about the item selections, click the “confirm” button and proceed to the next round.</p>
+        </div>
+        <div class='button-group-vc'>
+          <button class='big-button' id='instruction-mid-btn-1' onclick="startPhase2()">Next</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="task-phase2" class="base" ></div>
 
 
     <div id="debrief" class="base" style="display:none;">

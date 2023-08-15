@@ -5,21 +5,31 @@ let subjectData = {};
 
 
 /* Assign task items */
-const N_TASK = 30;
+const CONDITION = 0.6; // [0.1, 0.2, 0.6]
+
 const ALL_ITEMS = [ 'tria', 'star', 'circ'];
 const CONFIGS = {
   'tria': { 'prob': 0, 'cost': 0, 'reward': 0 },
-  'star': { 'prob': 0.6, 'cost': 10, 'reward': 50 },
+  'star': { 'prob': CONDITION, 'cost': 10, 'reward': 50 },
   'circ': { 'prob': 0.2, 'cost': 10, 'reward': 200 },
 }
-// const ADV_COLORS = ['limegreen', 'purple', 'pink', 'orange', 'lightskyblue' ];
+
+const TASK_COUNT = [ 5, 5 ];
+const N_TASK = TASK_COUNT.reduce((partialSum, a) => partialSum + a, 0);
 
 let [ clickData, clickDataKeys ] =[ {}, [] ];
 let [ task_items, task_cells, task_cell_item, task_scores ] = [ {}, {}, {}, [] ];
 
 for (let i = 0; i < N_TASK; i++) {
-  let task_size = 10; //randFromRange(2, 9);
-  task_items[`task_${i+1}`] = [ 'tria', 'tria', 'star', 'star', 'star', 'star', 'circ','circ','circ','circ' ] //sampleFromList(ALL_ITEMS, n=task_size); // sample items
+  let task_size = 0; //randFromRange(2, 9);
+
+  if (i < TASK_COUNT[0]) {
+    task_size = 6;
+    task_items[`task_${i+1}`] = [ 'tria', 'tria', 'tria', 'star', 'star', 'star' ]; //sampleFromList(ALL_ITEMS, n=task_size); // sample items
+  } else {
+    task_size = 9;
+    task_items[`task_${i+1}`] = [ 'tria', 'tria', 'tria', 'star', 'star', 'star', 'circ', 'circ', 'circ' ];
+  }
 
   let all_cell_ids = getAllCellIds();
   task_cells[`task_${i+1}`] = sampleFromList(all_cell_ids, n=task_size, replace=0); // sample cell-ids
@@ -32,6 +42,7 @@ for (let i = 0; i < N_TASK; i++) {
   task_scores.push(0)
 }
 clickDataKeys.forEach(el => clickData[el] = 0);
+console.log(task_cell_item)
 
 
 /* Collect prolific id */
@@ -104,7 +115,7 @@ for (let tid = 1; tid <= N_TASK; tid++) {
   // Task button
   let buttonDiv = createCustomElement('div', 'button-group-vc', '');
   let taskBtn = createBtn(`task-confirm-${tid}`, 'Combine!', false, 'big-button');
-  let taskNextBtn = createBtn(`task-next-${tid}`, 'Next', false, 'big-button');
+  let taskNextBtn = createBtn(`task-next-${tid}`, 'Next', true, 'big-button');
   let taskFillerBtn = createBtn(`task-noshow-${tid}`, '', true, 'big-button');
   taskFillerBtn.style.opacity = 0;
   buttonDiv.append(taskFillerBtn);
@@ -132,15 +143,22 @@ for (let tid = 1; tid <= N_TASK; tid++) {
   taskDiv.append(mainBoxDiv);
   taskDiv.append(buttonDiv);
 
-  getEl('task').append(taskDiv);
+  if (tid <= TASK_COUNT[0]) {
+    getEl('task-phase1').append(taskDiv);
+  } else {
+    getEl('task-phase2').append(taskDiv);
+  }
+
   taskDiv.style.display = (tid==1)? 'block': 'none';
 
 }
 function task_next(id) {
-  if (id < N_TASK) {
-    hideAndShowNext(`task-${id}`, `task-${id+1}`, "block");
+  if (id == TASK_COUNT[0]) {
+    hideAndShowNext(`task-${id}`, `instruction-mid`, "block");
+  } else if (id == N_TASK) {
+    hideAndShowNext("task-phase2", "debrief", "block");
   } else {
-    hideAndShowNext("task", "debrief", "block");
+    hideAndShowNext(`task-${id}`, `task-${id+1}`, "block");
   }
 }
 function cellClick (cell_id, taskId) {
@@ -168,7 +186,11 @@ function disableCellSelection(tid) {
     }
   }
 }
-
+function startPhase2 () {
+  hide('task-phase1');
+  hide('instruction-mid');
+  showNext(`task-${TASK_COUNT[0]+1}`, 'block')
+}
 
 
 
@@ -199,7 +221,7 @@ function handle_pass() {
   start_task_time = Date.now();
   hide("pass");
   hide("quiz");
-  showNext("task", "block");
+  showNext("task-1", "block");
 }
 function handle_retry() {
   hide("retry");
